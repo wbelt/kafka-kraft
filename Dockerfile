@@ -1,4 +1,4 @@
-FROM alpine:3.14 as base
+FROM alpine:3.14
 ENV BASE_URL=https://archive.apache.org/dist/kafka
 ENV LOG_DIR=/var/log
 ENV KAFKA_VERSION=3.1.0
@@ -15,7 +15,4 @@ RUN apk update \
 
 COPY --chmod=754 ./docker-wrapper.sh /opt/kafka/.
 ENTRYPOINT [ "/opt/kafka/docker-wrapper.sh" ]
-CMD [ "init" ]
-
-FROM base as node
 CMD [ "start" ]
