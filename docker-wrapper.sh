@@ -9,7 +9,7 @@ trap _term SIGINT SIGTERM
 
 #[ $LOG_DIR == "/var/log" ] && echo “true” || echo “false”
 if [ -z "$1" ]; then
-    echo "You must provide a command line argument"
+    echo "You must provide a command line argument.\n\nCurrent options are init or start."
 else
     properties_file=/opt/kafka/config/kraft/server.properties
     kafka_addr=localhost:9093
@@ -17,7 +17,7 @@ else
         echo "Starting init!"
         echo "==> Log directory environment variable... ${LOG_DIR}"
         
-        kafka_log_dir=$(sed -n "s/^log\.dirs=\(.*\)$/\1/p" /opt/kafka/config/kraft/server.properties)
+        kafka_log_dir=$(sed -n "s/^log\.dirs=\(.*\)$/\1/p" $properties_file)
         echo "==> Log directory in server.properties ... ${kafka_log_dir}"
         if [ $kafka_log_dir != $LOG_DIR ]; then
             echo "WARN: Log directories do not match!"
@@ -27,26 +27,21 @@ else
         else
             echo "==> ✅ Log diretory verified on filesystem."
         fi
-    elif [ $1 == "cluster" ]; then
-    # #export KAFKA_CLUSTER_ID=$(./bin/kafka-storage.sh random-uuid)
-    # #echo "==> Setting up Kafka storage...";
-    # #export suuid=$(./bin/kafka-storage.sh random-uuid);
-    # #/opt/kafka/bin/kafka-storage.sh format -t $suuid -c /opt/kafka/config/kraft/server.properties;
-    # #echo "==> ✅ Kafka storage setup.";
-    # echo "==> Starting Kafka server...";
-    # /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/kraft/server.properties &
-    # child=$!
-    # echo "==> ✅ Kafka server started.";
-
-    # wait "$child";
-
+        export KAFKA_CLUSTER_ID=$(/opt/kafka/bin/kafka-storage.sh random-uuid)
+        echo "==> Setting up Kafka storage for Cluser ID ${KAFKA_CLUSTER_ID}..."
+        /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c $properties_file
+        echo "==> ✅ Kafka storage setup."
+    elif [ $1 == "start" ]; then
+        echo "==> Applying environment variables..."
+        sed -r -i "s@^#?node\.id=.*@node\.id=${MY_ID}@g" $properties_file
+        sed -r -i "s@^#?controller\.quorum\.voters=.*@controller\.quorum\.voters=${MY_ID}\@localhost:9093,${ALT1_ID}\@localhost:9093,${ALT2_ID}\@localhost:9093@g" $properties_file
+        echo "==> ✅ Enivronment variables applied.";
+        echo "==> Starting Kafka server..."
+        /opt/kafka/bin/kafka-server-start.sh $properties_file &
+        child=$!
+        echo "==> ✅ Kafka server started."
+        wait "$child";
     else
-        echo "I got ${1}"
+        echo "Unexpected argument -- ${1}"
     fi
-
-    # echo "==> Applying environment variables...";
-    # sed -r -i "s@^#?node\.id=.*@node\.id=${MY_ID}@g" $properties_file;
-    # sed -r -i "s@^#?controller\.quorum\.voters=.*@controller\.quorum\.voters=${MY_ID}\@localhost:9093,${ALT1_ID}\@localhost:9093,${ALT2_ID}\@localhost:9093@g" $properties_file;
-    # echo "==> ✅ Enivronment variables applied.";
-
 fi

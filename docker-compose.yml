@@ -1,42 +1,19 @@
 version: "3.8"
 
 services:
+  node:
+    image: kafka-node:latest
+    command: init
+
   kafka1:
-    image: kafka-kraft:latest
+    image: kafka-node:latest
+    depends_on:
+    - node
     restart: always
     ports:
       - "9092:9092"
       - "9093:9093"
     environment:
-      - KRAFT_CONTAINER_HOST_NAME=kafka1
       - MY_ID=1
       - ALT1_ID=2
       - ALT2_ID=3
-      - CLUSTER_ID=9dJe8klXaDQzdGvfTPaCY4
-  kafka2:
-    image: kafka-kraft:latest
-    restart: always
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    environment:
-      - KRAFT_CONTAINER_HOST_NAME=kafka2
-      - MY_ID=2
-      - ALT1_ID=3
-      - ALT2_ID=1
-      - CLUSTER_ID=9dJe8klXaDQzdGvfTPaCY4
-  kafka3:
-    image: kafka-kraft:latest
-    restart: always
-    ports:
-      - "9092:9092"
-      - "9093:9093"
-    environment:
-      - KRAFT_CONTAINER_HOST_NAME=kafka3
-      - MY_ID=3
-      - ALT1_ID=1
-      - ALT2_ID=2
-      - CLUSTER_ID=9dJe8klXaDQzdGvfTPaCY4
-
-#      - KRAFT_CREATE_TOPICS=topic-a,topic-b,topic-c
-#      - KRAFT_PARTITIONS_PER_TOPIC=3
