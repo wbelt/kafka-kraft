@@ -20,9 +20,18 @@ else
         if [ -z $properties_file ]; then
             echo "🚨 Properties file not found... $properties_file"
         else
+            sed -r -i "s@^#?controller\.quorum\.voters=.*@controller\.quorum\.voters=1\@localhost:9093,2\@localhost:29093,3\@localhost:39093@g" $properties_file
+            if [ $MY_ID == 2]; then
+                sed -r -i "s@^#?listeners=.*@listeners=PLAINTEXT://:29092,CONTROLLER://:29093@g" $properties_file
+                sed -r -i "s@^#?advertised.listeners=.*@advertised.listeners=PLAINTEXT://:29092@g" $properties_file
+            elif [ $MY_ID == 3]; then
+                sed -r -i "s@^#?listeners=.*@listeners=PLAINTEXT://:39092,CONTROLLER://:39093@g" $properties_file
+                sed -r -i "s@^#?advertised.listeners=.*@advertised.listeners=PLAINTEXT://:39092@g" $properties_file
+            else
+                echo "🚨 Unknown MY_ID ($MY_ID), I only know how to deal with 1-3."
+            fi
             echo "==> Applying environment variables..."
             sed -r -i "s@^#?node\.id=.*@node\.id=${MY_ID}@g" $properties_file
-            sed -r -i "s@^#?controller\.quorum\.voters=.*@controller\.quorum\.voters=${MY_ID}\@localhost:9093,${ALT1_ID}\@localhost:9093,${ALT2_ID}\@localhost:9093@g" $properties_file
             kafka_log_dir=$(sed -n "s/^log\.dirs=\(.*\)$/\1/p" $properties_file)
             echo "==> Log directory in server.properties ... ${kafka_log_dir}"
             if [ $kafka_log_dir != $LOG_DIR ]; then
