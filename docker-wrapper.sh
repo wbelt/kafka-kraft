@@ -2,7 +2,7 @@
 
 _term() {
     echo "🚨 Termination signal received...";
-    kill -TERM "$child" 2>/dev/null
+    kill -TERM "$child" 2>/dev/nulldock
 }
 
 trap _term SIGINT SIGTERM
@@ -19,22 +19,22 @@ else
         
         if [ -z $properties_file ]; then
             echo "🚨 Properties file not found... $properties_file"
+        elif [ -z "$KAFKA_NODE_ID" ]; then
+            echo "🚨 Environment variable KAFKA_NODE_ID must be set."
+        elif [ -z "$KAFKA_CLUSTER_ID" ]; then
+            echo "🚨 Environment variable KAFKA_CLUSTER_ID must be set."
+        elif [ -z "$KAFKA_LISTENERS" ]; then
+            echo "🚨 Environment variable KAFKA_LISTENERS must be set."
+        elif [ -z "$KAFKA_ADVERTISED_LISTENERS" ]; then
+            echo "🚨 Environment variable KAFKA_ADVERTISED_LISTENERS must be set."
+        elif [ -z "$KAFKA_CONTROLLER_QUORUM_VOTERS" ]; then
+            echo "🚨 Environment variable KAFKA_CONTROLLER_QUORUM_VOTERS must be set."
         else
-            sed -r -i "s@^#?controller\.quorum\.voters=.*@controller\.quorum\.voters=1\@localhost:9093,2\@localhost:29093,3\@localhost:39093@g" $properties_file
-            if [ $MY_ID == 1 ]; then
-                sed -r -i "s@^#?listeners=.*@listeners=PLAINTEXT://:9092,CONTROLLER://:9093@g" $properties_file
-                sed -r -i "s@^#?advertised.listeners=.*@advertised.listeners=PLAINTEXT://:9092@g" $properties_file
-            elif [ $MY_ID == 2 ]; then
-                sed -r -i "s@^#?listeners=.*@listeners=PLAINTEXT://:29092,CONTROLLER://:29093@g" $properties_file
-                sed -r -i "s@^#?advertised.listeners=.*@advertised.listeners=PLAINTEXT://:29092@g" $properties_file
-            elif [ $MY_ID == 3 ]; then
-                sed -r -i "s@^#?listeners=.*@listeners=PLAINTEXT://:39092,CONTROLLER://:39093@g" $properties_file
-                sed -r -i "s@^#?advertised.listeners=.*@advertised.listeners=PLAINTEXT://:39092@g" $properties_file
-            else
-                echo "🚨 Unknown MY_ID ($MY_ID), I only know how to deal with 1-3."
-            fi
             echo "==> Applying environment variables..."
-            sed -r -i "s@^#?node\.id=.*@node\.id=${MY_ID}@g" $properties_file
+            sed -r -i "s@^#?node\.id=.*@node\.id=$KAFKA_NODE_ID@g" $properties_file
+            sed -r -i "s@^#?listeners=.*@listeners=${KAFKA_LISTENERS}@g" $properties_file
+            sed -r -i "s@^#?advertised.listeners=.*@advertised.listeners=${KAFKA_ADVERTISED_LISTENERS}@g" $properties_file
+            sed -r -i "s@^#?controller\.quorum\.voters=.*@controller\.quorum\.voters=${KAFKA_CONTROLLER_QUORUM_VOTERS}@g" $properties_file
             kafka_log_dir=$(sed -n "s/^log\.dirs=\(.*\)$/\1/p" $properties_file)
             echo "==> Log directory in server.properties ... ${kafka_log_dir}"
             if [ $kafka_log_dir != $LOG_DIR ]; then

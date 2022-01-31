@@ -3,16 +3,34 @@ version: "3.8"
 services:
   wb1:
     image: kafka-node:latest
+    ports:
+      - 9092:9092
+      - 9093:9093
     environment:
-      - MY_ID=1
+      - KAFKA_NODE_ID=1
       - KAFKA_CLUSTER_ID=xqoDSVREQDK1Qiqa551zwg
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1\@localhost:9093,2\@localhost:29093,3\@localhost:39093
   wb2:
     image: kafka-node:latest
+    ports:
+      - 29092:29092
+      - 29093:29093
     environment:
-      - MY_ID=2
+      - KAFKA_NODE_ID=2
       - KAFKA_CLUSTER_ID=xqoDSVREQDK1Qiqa551zwg
+      - KAFKA_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:29093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://:29092
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=2\@localhost:29093,3\@localhost:39093,1\@localhost:9093
   wb3:
     image: kafka-node:latest
+    ports:
+      - 39092:39092
+      - 39093:39093
     environment:
-      - MY_ID=3
+      - KAFKA_NODE_ID=3
       - KAFKA_CLUSTER_ID=xqoDSVREQDK1Qiqa551zwg
+      - KAFKA_LISTENERS=PLAINTEXT://:39092,CONTROLLER://:39093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://:39092
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=3\@localhost:39093,1\@localhost:9093,2\@localhost:29093
