@@ -1,0 +1,29 @@
+version: '2'
+services:
+  kafka-1:
+    image: debezium/kafka:1.7
+    ports:
+      - 19092:9092
+      - 19093:9093
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - BROKER_ID=1
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+  kafka-2:
+    image: debezium/kafka:1.7
+    ports:
+      - 29092:9092
+      - 29093:9093
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - BROKER_ID=2
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+  kafka-3:
+    image: debezium/kafka:1.7
+    ports:
+      - 39092:9092
+      - 39093:9093
+    environment:
+      - CLUSTER_ID=5Yr1SIgYQz-b-dgRabWx4g
+      - BROKER_ID=3
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
