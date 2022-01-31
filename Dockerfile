@@ -1,6 +1,6 @@
 FROM alpine:3.14
 ENV BASE_URL=https://archive.apache.org/dist/kafka
-ENV LOG_DIR=/var/log
+ENV LOG_DIR=/var/log/kraft-combined-logs
 ENV KAFKA_VERSION=3.1.0
 ENV SCALA_VERSION=2.13
 ENV CONFIG_FILE=/opt/kafka/config/kraft/server.properties
